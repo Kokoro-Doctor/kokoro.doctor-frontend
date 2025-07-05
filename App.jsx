@@ -6,7 +6,7 @@ import ChatBotOverlay from "./components/PatientScreenComponents/ChatbotComponen
 import { AuthProvider } from "./contexts/AuthContext";
 import { RoleProvider } from "./contexts/RoleContext";
 import RootNavigation, { linking } from "./navigation/RootNavigator";
-
+import NewDoctorMedicalReg from "./screens/DoctorScreens/DoctorRegistration/NewDoctorMedicalReg";
 const App = () => {
   const navigationRef = useRef(null);
 

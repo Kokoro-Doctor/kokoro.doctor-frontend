@@ -36,3 +36,5 @@ yarn-error.*
 
 #security keys
 # env-vars.js
+
+.idea/
