@@ -14,11 +14,13 @@ import {
 import { AuthContext } from "../../contexts/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import SideBarNavigation from "./SideBarNavigation";
+import NewSideNav from "../DoctorsPortalComponents/NewSideNav";
+import NewestSidebar from "../DoctorsPortalComponents/NewestSidebar";
 //import DoctorPatientLandingPage from "../../screens/DoctorScreens/DoctorRegistration/DoctorPatientLandingPage1";
 
 const { width, height } = Dimensions.get("window");
 
-const Header = ({ navigation }) => {
+const Header = ({ navigation, isDoctorPortal = false }) => {
   const { user, logout, setRole } = useContext(AuthContext);
   const { width } = useWindowDimensions();
   const [isSideBarVisible, setIsSideBarVisible] = useState(false);
@@ -271,10 +273,17 @@ const Header = ({ navigation }) => {
               >
                 <View style={styles.modalContainer}>
                   <View style={styles.mobileSidebar}>
-                    <SideBarNavigation
-                      navigation={navigation}
-                      closeSidebar={() => setIsSideBarVisible(false)}
-                    />
+                    {isDoctorPortal ? (
+                      <NewestSidebar 
+                        navigation={navigation}
+                        closeSidebar={() => setIsSideBarVisible(false)}
+                      />
+                    ) : (
+                      <SideBarNavigation
+                        navigation={navigation}
+                        closeSidebar={() => setIsSideBarVisible(false)}
+                      />
+                    )}
                   </View>
                   <Pressable
                     style={styles.overlay}
@@ -341,27 +350,29 @@ const Header = ({ navigation }) => {
                     )}
                   </View>
                 </View>
-                <View style={styles.usernameApp}>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#000000",
-                      fontSize: 20,
-                    }}
-                  >
-                    Hello,
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "800",
-                      color: "#000000",
-                      fontSize: 20,
-                    }}
-                  >
-                    {" "}
-                    {user?.name ? user?.name : "User"}!
-                  </Text>
-                </View>
+                {!isDoctorPortal && (
+                  <View style={styles.usernameApp}>
+                    <Text
+                      style={{
+                        fontWeight: "600",
+                        color: "#000000",
+                        fontSize: 20,
+                      }}
+                    >
+                      Hello,
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: "800",
+                        color: "#000000",
+                        fontSize: 20,
+                      }}
+                    >
+                      {" "}
+                      {user?.name ? user?.name : "User"}!
+                    </Text>
+                  </View>
+                )}
               </View>
             </>
           )}
@@ -375,7 +386,7 @@ const styles = StyleSheet.create({
   header: {
     height: "100%",
     justifyContent: "center",
-    alignItems: "center",
+    //alignItems: "center",
     ...Platform.select({
       web: {
         marginTop: 5,
@@ -398,7 +409,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     ...Platform.select({
       web: {
-        gap: 100,
+        //gap: 100,
       },
     }),
   },
