@@ -43,7 +43,9 @@ const DoctorsSignUp = () => {
         location: formData.location,
       });
       alert("Doctor registered successfully!");
-      navigation.navigate("DoctorMedicalRegistration");
+      navigation.navigate("DoctorMedicalRegistration" , {
+        email: formData.email,
+      });
     } catch (error) {
       alert(error.message);
       console.error("Doctor registration error:", error);
