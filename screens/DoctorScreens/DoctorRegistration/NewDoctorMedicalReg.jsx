@@ -58,7 +58,7 @@ const NewDoctorMedicalReg = ({ navigation, route}) => {
 
     const handleContinue = async () => {
         const { medicalCouncil, degreeCertificate, govID } = documents;
-        if (!degreeCertificate || !govID) {  // if (!medicalCouncil || !degreeCertificate || !govID)
+        if (!medicalCouncil || !degreeCertificate || !govID) {
             Alert.alert(
                 "Missing Information",
                 "Please fill all fields and upload all documents."
@@ -107,6 +107,7 @@ const NewDoctorMedicalReg = ({ navigation, route}) => {
                     {/* Right Panel */}
                     <View style={styles.rightPanel}>
                         <ScrollView contentContainerStyle={styles.formSection}>
+
                             <Text style={styles.heading}>
                                 Hang On! Medical Registration Proof
                             </Text>
@@ -205,7 +206,7 @@ const NewDoctorMedicalReg = ({ navigation, route}) => {
 
                             {/* Buttons */}
 
-                            <TouchableOpacity style={styles.continueBtn} onPress={handleContinue}>
+                            <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
                                 <Text style={styles.continueText}>Continue</Text>
                                 <View style={styles.iconCon}>
                                     <Ionicons name="arrow-forward" size={20} color="red" />
@@ -213,7 +214,7 @@ const NewDoctorMedicalReg = ({ navigation, route}) => {
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={styles.skipBtn}
+                                style={styles.skipButton}
                                 onPress={() => navigation.navigate("EstablishmentTiming")}
                             >
                                 <Text style={styles.skipText}>Skip</Text>
@@ -383,6 +384,8 @@ const NewDoctorMedicalReg = ({ navigation, route}) => {
     );
 };
 
+const windowWidth=Dimensions.get("window").width;
+
 const styles = StyleSheet.create({
     wrapper: {
                 flexDirection: "row",
@@ -451,19 +454,20 @@ const styles = StyleSheet.create({
         flex:1,
     },
     heading: {
-        fontSize:24,
-        fontWeight:700,
-        fontFamily:"Poppins",
-        marginBottom:'1%',
+        fontSize: 24,
+        fontWeight: 700,
+        fontFamily: "Poppins",
+        marginBottom: "1%",
         ...Platform.select({
             web: {
-                marginTop: "6%",
+                marginTop: "4%",
                 fontSize: 28,
                 fontWeight: "bold",
                 marginBottom: 32,
             },
         }),
     },
+
     mainHeadingBox:{
         flexDirection: "row",
         alignItems: "center",
@@ -645,23 +649,21 @@ const styles = StyleSheet.create({
         marginLeft:"20%",
         justifyContent: "center",
         overflow: "hidden",
-        ...Platform.select({
-            web: {
-                flexDirection: "row",
-                backgroundColor: "#ff5d73",
-                paddingVertical: 12,
-                borderRadius: 30,
-                elevation: 2,
-                width: "35%",
-                height: "8%",
-                minWidth:180,
-                maxWidth:200,
-                marginBottom: 20,
-                marginTop: 35,
-                alignSelf:"flex-start",
-                marginLeft:"0%",
-            },
-        }),
+    },
+    continueButton:{
+        flexDirection: "row",
+        backgroundColor: "#ff5d73",
+        paddingVertical: 12,
+        borderRadius: 30,
+        elevation: 2,
+        width: "35%",
+        height: "8%",
+        minWidth:180,
+        maxWidth:200,
+        marginBottom: 20,
+        marginTop: 35,
+        marginLeft: windowWidth>1000?"0%":"25%",
+        alignItems: "center",
     },
     continueText: {
         color: "white",
@@ -675,6 +677,7 @@ const styles = StyleSheet.create({
                 color: "white",
                 fontWeight: "bold",
                 paddingLeft: 45,
+
             },
         }),
     },
@@ -714,24 +717,23 @@ const styles = StyleSheet.create({
         width:168,
         alignSelf:"center",
         marginTop: "10%",
-        ...Platform.select({
-            web: {
-                backgroundColor: "#23c16b",
-                paddingVertical: 12,
-                paddingHorizontal: 24,
-                borderRadius: 10,
-                width: "12%",
-                height: "8%",
-                minWidth:150,
-                maxWidth:300,
-                marginTop: 10,
-                alignSelf:"flex-start",
-                alignItems: "center",
-                justifyContent: "center",
-                marginLeft:"3%",
-                marginBottom:"4%",
-            },
-        }),
+    },
+
+    skipButton:{
+        backgroundColor: "#23c16b",
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 10,
+        width: "12%",
+        height: "8%",
+        minWidth:150,
+        maxWidth:300,
+        marginTop: 10,
+        alignSelf:"flex-start",
+        alignItems: "center",
+        justifyContent: "center",
+        marginLeft: windowWidth>1000?"3%":"20%",
+        marginBottom: windowWidth>1000?"4%":"15%",
     },
     skipText: {
         color: "white",
