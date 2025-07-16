@@ -222,14 +222,17 @@ const DoctorMedicalRegistration = ({ navigation }) => {
               <View style={styles.formHeader}>
                 <View style={styles.headingContainer}>
                   <Text style={styles.headingAndroid}>Hang On!</Text>
+                  <View>
                   <Text style={styles.headingAndroid}>
-                    Medical Registration Proof
+                    Medical Registration
                   </Text>
+                  <Text style = {styles.headingAndroid}>Proof</Text>
+                  </View>
                 </View>
 
                 <Image
                   source={require("../../../assets/DoctorsPortal/Icons/doctorMedicalRegistration.png")}
-                  style={{ width: 150, height: 150 }}
+                  style={styles.headerImage}
                 />
               </View>
 
@@ -394,6 +397,7 @@ const styles = StyleSheet.create({
     paddingLeft: "2%",
     paddingRight : "2%",
     flexGrow: 1,
+    gap : 5
   },
 
   formHeader: {
@@ -406,7 +410,7 @@ const styles = StyleSheet.create({
   headingContainer: {
     display: "flex",
     flexDirection: "column",
-    gap : 15
+    gap : 40
   },
 
   heading: {
@@ -418,16 +422,20 @@ const styles = StyleSheet.create({
   headingAndroid: {
     marginTop: "6%",
     fontWeight: "semibold",
-    fontSize: 26,
+    fontSize: windowWidth < 550 ? 20 : 30,
     marginTop: 0,
-    width: 220,
-
+    width: windowWidth * 0.5,
+    
     ...Platform.select({
       web: {
-        width: "50vw",
-        fontSize: windowWidth < 600 ? 20 : 30,
-      },
+        width: windowWidth < 550 ? "55vw" : "50vw",
+      },  
     }),
+  },
+
+  headerImage : {
+    width: windowWidth < 400 ? 130 : 150, 
+    height: windowWidth < 400 ? 130 : 150
   },
 
   label: {
@@ -437,7 +445,8 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   labelAndroid: {
-    fontSize: windowWidth < 600  ? 18 : 25,
+    marginTop : 10,
+    fontSize: windowWidth < 500  ? 14 : 22,
     fontWeight: "400",
     marginBottom: 4,
     color: "#000",
@@ -479,7 +488,7 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    fontSize: windowWidth < 600 ? 14 : 22,
+    fontSize: 14,
     fontWeight: "500",
     color: "#333",
   },
@@ -570,13 +579,13 @@ const styles = StyleSheet.create({
   },
   continueTextAndroid: {
     color: "white",
-    fontWeight: "bold",
+    fontWeight: "semibold",
     fontSize: 25,
-    marginLeft: 69,
+    marginLeft: 70,
   },
 
   iconCon: {
-    marginLeft: "30%",
+    marginLeft: windowWidth < 1000 ? "23%" : "30%",
     width: 34,
     height: 34,
     backgroundColor: "white",
