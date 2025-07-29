@@ -7,7 +7,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  TextInput,
   Platform,
   Dimensions,
   ScrollView,
@@ -23,42 +22,59 @@ import { AuthContext } from "../../../contexts/AuthContext";
 import { payment_api } from "../../../utils/PaymentService";
 import Header from "../../../components/PatientScreenComponents/Header";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { API_URL } from "../../../env-vars";
 // import Icon from 'react-native-vector-icons/FontAwesome';
 
 const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  //const [patientName, setPatientName] = useState("");
   const { setChatbotConfig } = useChatbot();
   const { width } = useWindowDimensions();
   const { user } = useContext(AuthContext);
-  const { date, time, address, doctors, appointmentMode, meetingLink } =
-    route?.params?.doctors || {};
-  const [freeConsultationUsed, setFreeConsultationUsed] = useState(false);
+  // const doctors = route?.params?.doctors || {};
+  // const {selectedDate} = route?.params?.selectedDate || {};
+  // const {selectedTimeSlot} = route?.params?.selectedTimeSlot || {};e
+  const [booking, setBookings ] = useState();
 
-  // State for backend data
-  const [doctorId, setDoctorId] = useState(null);
+  const { doctors, selectedDate, selectedTimeSlot } = route?.params;
+  console.log("screen params →", route.params);
+
+  const [freeConsultationUsed, setFreeConsultationUsed] = useState(false);
   const [consultationFee, setConsultationFee] = useState(0);
 
-  useEffect(() => {
-    async function fetchDoctor() {
-      const data = await fetchDoctorDetails(doctors.doctorname);
-      setDoctorId(data.id);
-      setConsultationFee(data.feeAmount);
-    }
-    fetchDoctor();
-  }, [doctors]);
+// Add this at the start of DoctorsBookingPaymentScreen
+if (!doctors || !doctors.email) {
+  return <Text>Error: Doctor information not available.</Text>;
+}
+  // useEffect(() => {
+  //   if (!doctors) return;
 
-  // When booking
-  const bookingPayload = {
-    doctor_id: doctors.email,
-    user_id: user.email,
-    fee: feesAmount,
-    date: selectedDate,
-    start: slot.start,
-    appointmentMode,
-    address,
-    meetingLink,
-  };
+  //   const fetchDoctorBookings = async () => {
+  //     try {
+  //       const res = await fetch(`${API_URL}/doctorBookings/fetchBookings`, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           id: doctors.email,
+  //           type: "doctor",
+  //           days: 3,
+  //         }),
+  //       });
+
+  //       const data = await res.json();
+  //       if (res.ok) {
+  //         setBookings(data.bookings || []);
+  //       } else {
+  //         console.error("Error fetching bookings", data.detail);
+  //       }
+  //     } catch (err) {
+  //       console.error("Fetch error", err);
+  //     } 
+  //   };
+
+  //   fetchDoctorBookings();
+  // }, [doctors]);
 
   useFocusEffect(
     useCallback(() => {
@@ -66,11 +82,7 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
       setChatbotConfig({ height: "32%" });
     }, [])
   );
-
-  const handleSearch = () => {
-    Alert.alert(`Search Results for: ${searchQuery}`);
-  };
-
+  
   const handleContinuePayment = async () => {
     const amount = freeConsultationUsed ? consultationFee : 0;
     if (amount === 0) {
@@ -168,21 +180,18 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
                               <Image
                                 source={{ uri: doctors.profilePhoto }}
                                 style={styles.doctorAvatarImage}
-                                resizeMode="cover"
+                                //resizeMode="cover"
                               />
                             </View>
                             <View style={styles.doctorInfo}>
                               <Text style={styles.doctorFullName}>
-                                {/*                             Dr Kislay Shrivastava */}
                                 {doctors.doctorname}
                               </Text>
                               <Text style={styles.doctorSpecialization}>
-                                {doctors.doctorSpecialization}
-                                {/*                             MD,MS (Cardiology) */}
+                                {doctors.specialization}
                               </Text>
                               <Text style={styles.doctorExperience}>
-                                {/*                             22 Years Experience */}
-                                {doctors.doctorExperience}
+                                {doctors.experience}
                               </Text>
                               <View style={styles.locationSection}>
                                 <Icon
@@ -193,7 +202,6 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
                                 />
                                 <Text style={styles.locationText}>
                                   {doctors.location}
-                                  {/*                                     Bangabandhu Sheikh Mujib Medical University */}
                                 </Text>
                               </View>
                             </View>
@@ -205,7 +213,7 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
                             <View style={styles.divider} />
                             <View style={styles.appointmentBox}>
                               <Icon
-                                name="event" // or "calendar-today"
+                                name="event" 
                                 size={18}
                                 color="rgba(255, 0, 0, 0.75)"
                                 style={styles.appointmentIcon}
@@ -215,12 +223,12 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
                                   Appointment Date
                                 </Text>
                                 <Text style={styles.dateTimeText}>
-                                  {time ? time : "Time N/A"} |{" "}
-                                  {date ? date : "Date N/A"}
+                                  Date: {selectedDate || "N/A"}| Time:{" "}
+                                  {selectedTimeSlot?.time || "N/A"}
                                 </Text>
                               </View>
                             </View>
-                            <View style={styles.appointmentBox}>
+                            {/* <View style={styles.appointmentBox}>
                               <Icon
                                 name="medical-services"
                                 size={18}
@@ -236,11 +244,11 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
                                     ? appointmentMode.charAt(0).toUpperCase() +
                                       appointmentMode.slice(1)
                                     : "N/A"}
-                                  {/*                                               Offline */}
+                            
                                 </Text>
                               </View>
-                            </View>
-                            <View style={styles.appointmentBox}>
+                            </View> */}
+                            {/* <View style={styles.appointmentBox}>
                               <Icon
                                 name="medical-services"
                                 size={18}
@@ -252,7 +260,6 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
                                   {appointmentMode === "offline"
                                     ? "Address"
                                     : "Meeting Link"}
-                                  {/*                                                 Address */}
                                 </Text>
                                 <Text
                                   style={[
@@ -263,10 +270,10 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
                                   {appointmentMode === "offline"
                                     ? address || "N/A"
                                     : meetingLink || "N/A"}
-                                  {/*                                         Bangabandhu Sheikh Mujib Medical University */}
+                                  
                                 </Text>
                               </View>
-                            </View>
+                            </View> */}
                           </View>
                         </View>
                       </View>
@@ -603,12 +610,12 @@ const styles = StyleSheet.create({
     color: "rgb(0,0,0)",
     marginBottom: 10,
   },
-  doctorAvatars: {
-    height: 50,
-    width: 50,
-    borderWidth: 1,
-    borderRadius: 25,
-  },
+  // doctorAvatars: {
+  //   height: 50,
+  //   width: 50,
+  //   borderWidth: 1,
+  //   borderRadius: 25,
+  // },
   doctorAvatar: {
     marginRight: 10,
     borderRadius: 25,
@@ -619,6 +626,7 @@ const styles = StyleSheet.create({
   doctorAvatarImage: {
     width: 50,
     height: 50,
+    borderRadius:50
   },
   doctorInfo: {
     marginLeft: "5%",
