@@ -113,13 +113,20 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
     }
 
     try {
+        console.log("Preparing to book slot with payload:", {
+          doctor_id: doctors.email,
+          date: selectedDate,
+          start: selectedTimeSlot.start, // <--- Add this console.log
+          user_id: user.email,
+        });
+
       const res = await fetch(`${API_URL}/doctorBookings/book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           doctor_id: doctors.email,
           date: selectedDate,
-          start: selectedTimeSlot,
+          start: selectedTimeSlot.start,
           user_id: user.email, // from auth context
         }),
       });
@@ -310,7 +317,7 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                                     isFull && { backgroundColor: "#ccc" },
                                   ]}
                                   onPress={() => {
-                                    setSelectedTimeSlot(slot.start);
+                                    setSelectedTimeSlot(slot);
                                   }}
                                 >
                                   <Text
