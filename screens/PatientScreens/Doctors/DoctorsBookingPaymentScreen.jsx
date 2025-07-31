@@ -31,55 +31,133 @@ import { payment_api } from "../../../utils/PaymentService";
 import Header from "../../../components/PatientScreenComponents/Header";
 
 import Icon from "react-native-vector-icons/MaterialIcons";
+
+import { API_URL } from "../../../env-vars";
+
 // import Icon from 'react-native-vector-icons/FontAwesome';
 
 const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  //const [patientName, setPatientName] = useState("");
+
   const { setChatbotConfig } = useChatbot();
 
   const { width } = useWindowDimensions();
 
   const { user } = useContext(AuthContext);
-  const { date, time, address, doctors, appointmentMode, meetingLink } =
-    route?.params?.doctors || {};
+
+  // const doctors = route?.params?.doctors || {};
+
+  // const {selectedDate} = route?.params?.selectedDate || {};
+
+  // const {selectedTimeSlot} = route?.params?.selectedTimeSlot || {};e
+
+  const [booking, setBookings] = useState();
+
+  const { doctors, selectedDate, selectedTimeSlot } = route?.params;
+
+  console.log("screen params →", route.params);
+
+  const [displayDate, setDisplayDate] = useState(selectedDate);
+
+  const [displayTime, setDisplayTime] = useState(selectedTimeSlot?.start);
+
+  // State to store all fetched bookings (for potential debugging/further use, though not directly displayed)
+
+  const [fetchedBookings, setFetchedBookings] = useState([]);
+
   const [freeConsultationUsed, setFreeConsultationUsed] = useState(false);
 
-  // State for backend data
-  const [doctorId, setDoctorId] = useState(null);
   const [consultationFee, setConsultationFee] = useState(0);
 
   useEffect(() => {
-    async function fetchDoctor() {
-      const data = await fetchDoctorDetails(doctors.doctorname);
-      setDoctorId(data.id);
-      setConsultationFee(data.feeAmount);
+    if (!doctors || !doctors.email) {
+      console.warn(
+        "Doctors object or email is missing, cannot fetch bookings."
+      );
+      return;
     }
-    fetchDoctor();
-  }, [doctors]);
 
-  // When booking
-  const bookingPayload = {
-    doctor_id: doctors.email,
-    user_id: user.email,
-    fee: feesAmount,
-    date: selectedDate,
-    start: slot.start,
-    appointmentMode,
-    address,
-    meetingLink,
-  };
+    const fetchAndConfirmBookingDetails = async () => {
+      try {
+        const res = await fetch(`${API_URL}/doctorBookings/fetchBookings`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: doctors.email,
+            type: "doctor", // Fetching bookings for a doctor
+            days: 3, // Look back 3 days to find the recent booking
+          }),
+        });
 
-  useFocusEffect(
-    useCallback(() => {
-      // Reset chatbot height when this screen is focused
-      setChatbotConfig({ height: "32%" });
-    }, [])
-  );
+        const data = await res.json();
+        if (res.ok) {
+          const allBookings = data.bookings || [];
+          setFetchedBookings(allBookings); // Store all fetched bookings
 
-  const handleSearch = () => {
-    Alert.alert(`Search Results for: ${searchQuery}`);
-  };
+          const userId = user?.email; // Get the current authenticated user's ID
+
+          // We use doctor_id, user_id, date, and start time to uniquely identify it.
+          const matchedBooking = allBookings.find(
+            (booking) =>
+              booking.doctor_id === doctors.email &&
+              booking.date === selectedDate && // Match with the date passed from previous screen
+              booking.start === selectedTimeSlot?.start && // Match with the time passed from previous screen
+              booking.user_id === userId
+          );
+
+          if (matchedBooking) {
+            // If a match is found, use the date and time from the fetched backend data
+            setDisplayDate(matchedBooking.date);
+            setDisplayTime(matchedBooking.start);
+            console.log("Found matching booking from backend:", matchedBooking);
+          } else {
+            // No exact match found
+            // Inform the user.
+            Alert.alert(
+              "Booking Confirmation Failed",
+              "We couldn't find a record for your recent booking. Please check your past bookings or try again.",
+              [{ text: "OK", onPress: () => navigation.navigate("Home") }]
+            );
+            console.warn(
+              "No exact matching booking found in backend response, implying booking was not confirmed."
+            );
+          }
+        } else {
+          // API returned an error status (e.g., 500, 400)
+          Alert.alert(
+            "Error",
+            `Failed to fetch booking details: ${
+              data.detail || "An unexpected error occurred."
+            }`,
+            [
+              {
+                text: "OK",
+                onPress: () => navigation.navigate("DoctorsInfoWithBooking"),
+              },
+            ]
+          );
+          console.error("Error fetching bookings from backend:", data.detail);
+        }
+      } catch (err) {
+        // Network error, JSON parsing error, etc.
+        Alert.alert(
+          "Network Error",
+          "Could not connect to the server to confirm your booking. Please check your internet connection and try again.",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.navigate("DoctorsInfoWithBooking"),
+            },
+          ] // Navigating to doctor info
+        );
+        console.error("Network or parsing error during fetch:", err);
+      }
+    };
+
+    fetchAndConfirmBookingDetails();
+  }, [doctors, selectedDate, selectedTimeSlot, user, navigation]);
 
   const handleContinuePayment = async () => {
     const amount = freeConsultationUsed ? consultationFee : 0;
@@ -202,7 +280,8 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
                               <Image
                                 source={{ uri: doctors.profilePhoto }}
                                 style={styles.doctorAvatarImage}
-                                resizeMode="cover"
+
+                                //resizeMode="cover"
                               />
                             </View>
 
@@ -243,7 +322,7 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
 
                             <View style={styles.appointmentBox}>
                               <Icon
-                                name="event" // or "calendar-today"
+                                name="event"
                                 size={18}
                                 color="rgba(255, 0, 0, 0.75)"
                                 style={styles.appointmentIcon}
@@ -255,61 +334,107 @@ const DoctorsBookingPaymentScreen = ({ navigation, route }) => {
                                 </Text>
 
                                 <Text style={styles.dateTimeText}>
-                                  {time ? time : "Time N/A"} |{" "}
-                                  {date ? date : "Date N/A"}
+                                  Date: {displayDate || "N/A"}| Time:{" "}
+                                  {displayTime || "N/A"}
                                 </Text>
                               </View>
                             </View>
-                            <View style={styles.appointmentBox}>
-                              <Icon
-                                name="medical-services"
-                                size={18}
-                                color="rgba(255, 0, 0, 0.75)"
-                                style={styles.appointmentIcon}
-                              />
-                              <View style={styles.date}>
-                                <Text style={styles.dateText}>
-                                  Appointment Mode
-                                </Text>
-                                <Text style={styles.dateTimeText}>
-                                  {appointmentMode
-                                    ? appointmentMode.charAt(0).toUpperCase() +
-                                      appointmentMode.slice(1)
-                                    : "N/A"}
-                                  {/*                                               Offline */}
-                                </Text>
-                              </View>
-                            </View>
-                            <View style={styles.appointmentBox}>
-                              <Icon
-                                name="medical-services"
-                                size={18}
-                                color="rgba(255, 0, 0, 0.75)"
-                                style={styles.appointmentIcon}
-                              />
-                              <View style={styles.date}>
-                                <Text style={styles.dateText}>
-                                  {appointmentMode === "offline"
-                                    ? "Address"
-                                    : "Meeting Link"}
-                                  {/*                                                 Address */}
-                                </Text>
-                                <Text
-                                  style={[
-                                    styles.dateTimeText,
-                                    { flexWrap: "wrap", width: 250 },
-                                  ]}
-                                >
-                                  {appointmentMode === "offline"
-                                    ? address || "N/A"
-                                    : meetingLink || "N/A"}
-                                  {/*                                         Bangabandhu Sheikh Mujib Medical University */}
-                                </Text>
-                              </View>
-                            </View>
+
+                            {/* <View style={styles.appointmentBox}>
+
+<Icon
+
+name="medical-services"
+
+size={18}
+
+color="rgba(255, 0, 0, 0.75)"
+
+style={styles.appointmentIcon}
+
+/>
+
+<View style={styles.date}>
+
+<Text style={styles.dateText}>
+
+Appointment Mode
+
+</Text>
+
+<Text style={styles.dateTimeText}>
+
+{appointmentMode
+
+? appointmentMode.charAt(0).toUpperCase() +
+
+appointmentMode.slice(1)
+
+: "N/A"}
+
+
+
+</Text>
+
+</View>
+
+</View> */}
+
+                            {/* <View style={styles.appointmentBox}>
+
+<Icon
+
+name="medical-services"
+
+size={18}
+
+color="rgba(255, 0, 0, 0.75)"
+
+style={styles.appointmentIcon}
+
+/>
+
+<View style={styles.date}>
+
+<Text style={styles.dateText}>
+
+{appointmentMode === "offline"
+
+? "Address"
+
+: "Meeting Link"}
+
+</Text>
+
+<Text
+
+style={[
+
+styles.dateTimeText,
+
+{ flexWrap: "wrap", width: 250 },
+
+]}
+
+>
+
+{appointmentMode === "offline"
+
+? address || "N/A"
+
+: meetingLink || "N/A"}
+
+
+
+</Text>
+
+</View>
+
+</View> */}
                           </View>
                         </View>
                       </View>
+
                       <View style={styles.verticalDivider} />
 
                       <View style={styles.rightHalf}>
@@ -750,12 +875,19 @@ const styles = StyleSheet.create({
 
     marginBottom: 10,
   },
-  doctorAvatars: {
-    height: 50,
-    width: 50,
-    borderWidth: 1,
-    borderRadius: 25,
-  },
+
+  // doctorAvatars: {
+
+  // height: 50,
+
+  // width: 50,
+
+  // borderWidth: 1,
+
+  // borderRadius: 25,
+
+  // },
+
   doctorAvatar: {
     marginRight: 10,
 
@@ -772,6 +904,8 @@ const styles = StyleSheet.create({
     width: 50,
 
     height: 50,
+
+    borderRadius: 50,
   },
 
   doctorInfo: {
