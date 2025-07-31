@@ -113,28 +113,39 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
     }
 
     try {
+        console.log("Preparing to book slot with payload:", {
+          doctor_id: doctors.email,
+          date: selectedDate,
+          start: selectedTimeSlot.start, // <--- Add this console.log
+          user_id: user.email,
+        });
+
       const res = await fetch(`${API_URL}/doctorBookings/book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           doctor_id: doctors.email,
           date: selectedDate,
-          start: selectedTimeSlot,
+          start: selectedTimeSlot.start,
           user_id: user.email, // from auth context
         }),
       });
-      
 
       const data = await res.json();
       // console.log("Booked successfully:", data);
       alert("Slot booked successfully!");
+      console.log("Navigating with: ", {
+        doctor: doctors,
+      });
       navigation.navigate("DoctorsBookingPaymentScreen", {
         doctors,
-        bookingDetails: {
-          date: selectedDate,
-          start: selectedTimeSlot,
-          confirmation: data, // backend response
-        },
+        selectedDate: selectedDate,
+        selectedTimeSlot: selectedTimeSlot,
+        // bookingDetails: {
+        //   date: selectedDate,
+        //   start: selectedTimeSlot,
+        //   confirmation: data, // backend response
+        // },
       });
     } catch (error) {
       // console.error("Booking error:", error);
@@ -152,13 +163,7 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
       return;
     }
 
-    navigation.navigate("DoctorsBookingPaymentScreen", {
-      doctor_id: doctors.email,
-      doctorName: doctors.doctorname,
-      date: selectedDate,
-      start: selectedTimeSlot,
-      fees: doctors.fees || Free,
-    });
+    navigation.navigate("DoctorsBookingPaymentScreen", { doctors });
   };
 
   return (
@@ -312,7 +317,7 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                                     isFull && { backgroundColor: "#ccc" },
                                   ]}
                                   onPress={() => {
-                                    setSelectedTimeSlot(slot.start);
+                                    setSelectedTimeSlot(slot);
                                   }}
                                 >
                                   <Text
@@ -365,6 +370,16 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                           {selectedTimeSlot ? "Book Slot" : "Book Slot"}
                         </Text>
                       </TouchableOpacity>
+{/*                       <TouchableOpacity */}
+{/*                         style={styles.bookSlotButton} */}
+{/*                         onPress={() => */}
+{/*                           navigation.navigate("DoctorsBookingPaymentScreen", { */}
+{/*                             doctors, */}
+{/*                           }) */}
+{/*                         } */}
+{/*                       > */}
+{/*                         <Text style={styles.bookSlotText}>Skip</Text> */}
+{/*                       </TouchableOpacity> */}
                     </View>
                   </View>
                 </View>
@@ -1395,7 +1410,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: "3%",
     borderRadius: 5,
-    backgroundColor: "rgba(254, 81, 83, 0.6)",
+    backgroundColor: "rgba(215, 35, 38, 0.6)",
   },
   bookSlotText: {
     fontSize: 16,
