@@ -106,52 +106,57 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
   const handleSlotSelect = (slot) => {
     setSelectedTimeSlot(slot);
   };
+
   const bookSlot = async () => {
     if (!selectedDate || !selectedTimeSlot) {
       alert("Please select a date and time slot.");
       return;
     }
 
-    try {
-        console.log("Preparing to book slot with payload:", {
-          doctor_id: doctors.email,
-          date: selectedDate,
-          start: selectedTimeSlot.start, // <--- Add this console.log
-          user_id: user.email,
-        });
+    // Log the data you're about to send
+    const bookingPayload = {
+      doctor_id: doctors.id || doctors.email,
+      date: selectedDate,
+      start: selectedTimeSlot.start,
+      user_id: user.email,
+    };
+    console.log("Attempting to book with payload:", JSON.stringify(bookingPayload, null, 2));
 
+    try {
       const res = await fetch(`${API_URL}/doctorBookings/book`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          doctor_id: doctors.email,
-          date: selectedDate,
-          start: selectedTimeSlot.start,
-          user_id: user.email, // from auth context
-        }),
+        body: JSON.stringify(bookingPayload),
       });
 
-      const data = await res.json();
-      // console.log("Booked successfully:", data);
+      // Get the raw text of the response first for debugging
+      const responseText = await res.text();
+      console.log("Raw server response:", responseText);
+      console.log("Response status:", res.status);
+
+      // Try to parse the text as JSON
+      const data = JSON.parse(responseText);
+
+      // Check if the server responded with an error status
+      if (!res.ok) {
+        // Use the server's error message if it exists
+        const errorMessage = data.message || "The server returned an error.";
+        throw new Error(errorMessage);
+      }
+
+      // This part only runs if the booking was truly successful (status 2xx)
       alert("Slot booked successfully!");
-      console.log("Navigating with: ", {
-        doctor: doctors,
-      });
       navigation.navigate("DoctorsBookingPaymentScreen", {
         doctors,
         selectedDate: selectedDate,
         selectedTimeSlot: selectedTimeSlot,
-        // bookingDetails: {
-        //   date: selectedDate,
-        //   start: selectedTimeSlot,
-        //   confirmation: data, // backend response
-        // },
       });
+
     } catch (error) {
-      // console.error("Booking error:", error);
-      alert("Failed to book slot.");
+      // 🕵️ THIS WILL SHOW THE REAL ERROR
+      console.error("🔴 BOOKING FAILED:", error);
+      alert(`Booking failed: ${error.message}`);
     }
-    // console.log(user.email, doctors.email);
   };
 
   // const handleBookAppointment = () => {
@@ -251,8 +256,8 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                                       i + 1 <= review.rating
                                         ? "star"
                                         : i + 0.5 <= review.rating
-                                        ? "star-half"
-                                        : "star-border"
+                                          ? "star-half"
+                                          : "star-border"
                                     }
                                     size={16}
                                     color="#FFD700"
@@ -305,15 +310,15 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                             showsVerticalScrollIndicator={false}
                           >
                             {availableSlots.map((slot, idx) => {
-                              const isFull = slot.available === 0;
+                              const isFull = !slot.available;
                               return (
                                 <TouchableOpacity
                                   key={idx}
                                   disabled={isFull}
                                   style={[
                                     styles.timeSlot,
-                                    selectedTimeSlot === slot.start &&
-                                      styles.selectedTimeSlot,
+                                    selectedTimeSlot?.start === slot.start &&
+                                    styles.selectedTimeSlot,
                                     isFull && { backgroundColor: "#ccc" },
                                   ]}
                                   onPress={() => {
@@ -323,8 +328,8 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                                   <Text
                                     style={[
                                       styles.timeSlotText,
-                                      selectedTimeSlot === slot.start &&
-                                        styles.selectedTimeSlotText,
+                                      selectedTimeSlot?.start === slot.start &&
+                                      styles.selectedTimeSlotText,
                                     ]}
                                   >
                                     {slot.start} - {slot.end}
@@ -336,8 +341,8 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                                     {isFull
                                       ? "Full"
                                       : typeof slot.available === "number"
-                                      ? `${slot.available}`
-                                      : ""}
+                                        ? `${slot.available}`
+                                        : ""}
                                   </Text>
                                 </TouchableOpacity>
                               );
@@ -370,16 +375,16 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                           {selectedTimeSlot ? "Book Slot" : "Book Slot"}
                         </Text>
                       </TouchableOpacity>
-{/*                       <TouchableOpacity */}
-{/*                         style={styles.bookSlotButton} */}
-{/*                         onPress={() => */}
-{/*                           navigation.navigate("DoctorsBookingPaymentScreen", { */}
-{/*                             doctors, */}
-{/*                           }) */}
-{/*                         } */}
-{/*                       > */}
-{/*                         <Text style={styles.bookSlotText}>Skip</Text> */}
-{/*                       </TouchableOpacity> */}
+                      {/*                       <TouchableOpacity */}
+                      {/*                         style={styles.bookSlotButton} */}
+                      {/*                         onPress={() => */}
+                      {/*                           navigation.navigate("DoctorsBookingPaymentScreen", { */}
+                      {/*                             doctors, */}
+                      {/*                           }) */}
+                      {/*                         } */}
+                      {/*                       > */}
+                      {/*                         <Text style={styles.bookSlotText}>Skip</Text> */}
+                      {/*                       </TouchableOpacity> */}
                     </View>
                   </View>
                 </View>
@@ -511,19 +516,18 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                             disabled={isFull}
                             style={[
                               styles.timeSlot,
-                              selectedTimeSlot === slot.start &&
-                                styles.selectedTimeSlot,
+                              selectedTimeSlot?.start === slot.start && styles.selectedTimeSlot,
                               isFull && { backgroundColor: "#ccc" },
                             ]}
                             onPress={() => {
-                              setSelectedTimeSlot(slot.start);
+                              setSelectedTimeSlot(slot);
                             }}
                           >
                             <Text
                               style={[
                                 styles.timeSlotText,
-                                selectedTimeSlot === slot.start &&
-                                  styles.selectedTimeSlotText,
+                                selectedTimeSlot?.start === slot.start &&
+                                styles.selectedTimeSlotText,
                               ]}
                             >
                               {slot.start} - {slot.end}
@@ -532,8 +536,8 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
                               {isFull
                                 ? "Full"
                                 : typeof slot.available === "number"
-                                ? `${slot.available}`
-                                : ""}
+                                  ? `${slot.available}`
+                                  : ""}
                             </Text>
                           </TouchableOpacity>
                         );
@@ -549,7 +553,7 @@ const DoctorsInfoWithBooking = ({ navigation, route }) => {
             </View>
             <TouchableOpacity
               style={styles.bookAppointmentButton}
-              onPress={handleBookAppointment}
+              onPress={bookSlot}
             >
               <Text style={styles.bookAppointmentText}>Book Slot</Text>
             </TouchableOpacity>
