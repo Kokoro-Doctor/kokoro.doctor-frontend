@@ -112,6 +112,9 @@ const Header = ({ navigation, isDoctorPortal = false }) => {
                       <Pressable onPress={logout} style={styles.dropdownItem}>
                         <Text style={styles.dropdownText}>Logout</Text>
                       </Pressable>
+                      <Pressable onPress={logout} style={styles.dropdownItem}>
+                          <Text style={styles.dropdownText}>Delete Account</Text>
+                        </Pressable>
                     </View>
                   )}
                 </View>
@@ -199,6 +202,7 @@ const Header = ({ navigation, isDoctorPortal = false }) => {
                         <Pressable onPress={logout} style={styles.dropdownItem}>
                           <Text style={styles.dropdownText}>Logout</Text>
                         </Pressable>
+                        
                       </View>
                     )}
                   </View>
@@ -537,6 +541,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     zIndex: 100,
+    marginRight:"2%"
   },
   dropdownLoggedOut: {
     top: 30,
@@ -548,13 +553,13 @@ const styles = StyleSheet.create({
   },
   dropdownWeb: {
     top: 40,
-    right: -70,
+    right: "2%",
   },
   dropdownItem: {
     padding: 10,
   },
   dropdownText: {
-    fontSize: 16,
+    fontSize: 14,
   },
   welcomeContainer: {},
   welcomeText: {
