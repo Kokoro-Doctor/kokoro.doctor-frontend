@@ -693,16 +693,17 @@ const styles = StyleSheet.create({
     }),
   },
   experienceRatingContainer: {
-    height: "7%",
+    height: "8%",
     width: "88%",
-    //borderWidth: 1,
+    borderWidth: 1,
     alignSelf: "center",
     flexDirection: "row",
     justifyContent: "space-around",
     borderRadius: 5,
     boxShadow: " 0px 0px 4px 3px rgba(0, 0, 0, 0.25)",
     backgroundColor: "rgba(255, 252, 252, 1)",
-    padding: "2%",
+    marginVertical:"2%",
+    //padding: "2%",
     ...Platform.select({
       web: {
         minHeight: 60, // Ensures visibility in web view
@@ -737,6 +738,7 @@ const styles = StyleSheet.create({
     //borderWidth: 1,
     alignSelf: "center",
     flexDirection: "column",
+    padding:"1%"
   },
   experienceText: {
     fontSize: 14,
@@ -772,10 +774,10 @@ const styles = StyleSheet.create({
 
   OfflineOnlineMode: {
     //borderWidth:1,
-    height: "7%",
+    height: "8%",
     width: "88%",
     alignSelf: "center",
-    marginVertical: "2%",
+    marginVertical: "1%",
     borderRadius: 5,
     boxShadow: " 0px 0px 4px 3px rgba(0, 0, 0, 0.25)",
     backgroundColor: "rgba(255, 252, 252, 1)",
@@ -824,11 +826,11 @@ const styles = StyleSheet.create({
     fontWeight: 500,
   },
   consultationFess: {
-    height: "7%",
+    height: "8%",
     width: "88%",
     //borderWidth: 1,
     alignSelf: "center",
-    marginVertical: "0.4%",
+    marginVertical: "1.8%",
     borderRadius: 5,
     //borderColor:"red",
     boxShadow: " 0px 0px 4px 3px rgba(0, 0, 0, 0.25)",
@@ -862,7 +864,7 @@ const styles = StyleSheet.create({
     marginVertical: "16%",
   },
   feesBox: {
-    height: "90%",
+    height: "100%",
     width: "60%",
     //borderWidth: 1,
     marginHorizontal: "3.5%",
