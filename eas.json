@@ -5,17 +5,28 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_ANDROID_NDK_VERSION": "25.1.8937393"
+      },
+      "android": {
+        "ndkVersion": "25.1.8937393"
+      }
     },
     "preview": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "ndkVersion": "25.1.8937393"
+      },
+      "env": {
+        "EXPO_ANDROID_NDK_VERSION": "25.1.8937393"
       }
     },
     "production": {
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "ndkVersion": "25.1.8937393"
       }
     }
   },
