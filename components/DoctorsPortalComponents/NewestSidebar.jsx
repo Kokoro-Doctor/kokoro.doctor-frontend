@@ -19,6 +19,10 @@ const NewestSidebar = ({ closeSidebar, activeItem = "Calendar" }) => {
 
   const menuItems = [
     {
+      name: "Home",
+      icon: require("../../assets/Icons/HomeProfile.png"),
+    },
+    {
       name: "Calendar",
       icon: require("../../assets/DoctorsPortal/Icons/calendar.png"),
     },
