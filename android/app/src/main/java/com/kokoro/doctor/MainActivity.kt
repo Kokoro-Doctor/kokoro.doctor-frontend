@@ -1,4 +1,6 @@
-package com.kokoro.doctor
+package com.kokoro.doctorapp
+import com.kokoro.doctorapp.BuildConfig
+
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

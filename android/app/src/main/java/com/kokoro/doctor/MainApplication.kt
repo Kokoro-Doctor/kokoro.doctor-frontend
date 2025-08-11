@@ -1,4 +1,4 @@
-package com.kokoro.doctor
+package com.kokoro.doctorapp
 
 import android.app.Application
 import android.content.res.Configuration
