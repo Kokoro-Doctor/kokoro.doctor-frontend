@@ -1,5 +1,5 @@
 diff --git a/node_modules/expo-modules-core/android/src/main/cpp/JavaCallback.cpp b/node_modules/expo-modules-core/android/src/main/cpp/JavaCallback.cpp
-index f12afe3..4d12715 100644
+index f12afe3..1900ba4 100644
 --- a/node_modules/expo-modules-core/android/src/main/cpp/JavaCallback.cpp
 +++ b/node_modules/expo-modules-core/android/src/main/cpp/JavaCallback.cpp
 @@ -1,280 +1,504 @@
@@ -691,4 +691,3 @@ index f12afe3..4d12715 100644
  }
 +
  } // namespace expo
-\ No newline at end of file
